@@ -1,4 +1,4 @@
-name: Listing all s3 buckets
+name: Creating s3 bucket using GitHub Actions
 
 
 on:
@@ -14,10 +14,32 @@ jobs:
   list-s3-buckets:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: set up AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.IAM_ROLE_ARN_NEW }}
           aws-region: us-east-1
-      - name: List S3 buckets
-        run: aws s3 ls 
+      
+      - name: install terraform 
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Initialize Terraform
+        run: terraform init
+        working-directory: terraform
+
+      - name: terraform plan
+        env:
+          BUCKET_NAME: ${{ secrets.BUCKET_NAME }}
+        run: | 
+          terraform plan \
+            -var "bucket_name=${BUCKET_NAME}"
+        working-directory: terraform
+        
+      - name: Apply Terraform
+        env:
+          TF_VAR_bucket_name: ${{ secrets.BUCKET_NAME }}
+        run: terraform apply -auto-approve
+        working-directory: terraform
