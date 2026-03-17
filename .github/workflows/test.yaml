@@ -11,7 +11,7 @@ permissions:
   contents: read
 
 jobs:
-  list-s3-buckets:
+  create-s3-buckets:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
